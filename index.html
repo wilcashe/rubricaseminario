@@ -181,7 +181,7 @@
             const rubricBody = document.getElementById('rubric-body');
             const totalScoreEl = document.getElementById('total-score');
             const finalGradeEl = document.getElementById('final-grade');
-            const finalAssessmentEl = document.getElementById('final-assessment');
+            //const finalAssessmentEl = document.getElementById('final-assessment');
             const saveButton = document.getElementById('save-button');
             const resetButton = document.getElementById('reset-button');
             const savedEvalsList = document.getElementById('saved-evaluations-list');
@@ -261,7 +261,7 @@
                 const finalGrade = maxScore > 0 ? (currentTotalScore / maxScore * 5.0).toFixed(1) : "0.0";
                 totalScoreEl.textContent = currentTotalScore;
                 finalGradeEl.textContent = finalGrade;
-                updateAssessment(finalGrade);
+                //updateAssessment(finalGrade);
             }
 
             function updateAssessment(grade) {
