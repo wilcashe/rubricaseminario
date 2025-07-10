@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rúbrica de Evaluación Colaborativa de Anteproyectos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .table-cell {
+            padding: 12px 16px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        .header-cell {
+            background-color: #f8fafc;
+            font-weight: 600;
+        }
+        .criterion-cell {
+            text-align: left;
+            font-weight: 500;
+        }
+        input[type="radio"] {
+            transform: scale(1.5);
+            accent-color: #2563eb;
+        }
+        #modal {
+            transition: opacity 0.3s ease;
+        }
+        .saved-eval-card {
+            border-left: 4px solid #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">Rúbrica de Evaluación de Anteproyectos</h1>
+            <p class="mt-2 text-lg text-gray-600">Complete los datos, evalúe cada criterio y agregue sus observaciones.</p>
+        </header>
+
+        <main>
+            <!-- Formulario de Datos del Proyecto -->
+            <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200 mb-8">
+                <h2 class="text-2xl font-bold mb-4">Información General</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="evaluator-name" class="block text-sm font-medium text-gray-700 mb-1">Nombre del Evaluador</label>
+                        <input type="text" id="evaluator-name" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: Dr. Juan Pérez">
+                    </div>
+                    <div>
+                        <label for="project-name" class="block text-sm font-medium text-gray-700 mb-1">Nombre del Anteproyecto / Estudiante</label>
+                        <input type="text" id="project-name" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: Sistema de gestión para...">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenedor de la Rúbrica -->
+            <div class="bg-white shadow-lg rounded-xl overflow-x-auto mb-8">
+                <table class="min-w-full w-full border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="table-cell header-cell criterion-cell w-1/4">Criterio de Evaluación</th>
+                            <th class="table-cell header-cell w-[18%]">Excelente (5 pts)</th>
+                            <th class="table-cell header-cell w-[18%]">Bueno (4 pts)</th>
+                            <th class="table-cell header-cell w-[18%]">Regular (3 pts)</th>
+                            <th class="table-cell header-cell w-[18%]">Deficiente (1 pt)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rubric-body">
+                        <!-- Filas generadas por JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Sección de Observaciones -->
+            <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200 mb-8">
+                <h2 class="text-2xl font-bold mb-4">Observaciones Generales</h2>
+                <div>
+                    <label for="observations" class="sr-only">Observaciones</label>
+                    <textarea id="observations" rows="5" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Añada aquí sus comentarios, fortalezas y aspectos a mejorar del anteproyecto..."></textarea>
+                </div>
+            </div>
+
+            <!-- Sección de Resultados y Acciones -->
+            <div id="results" class="mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                    <h2 class="text-2xl font-bold text-center mb-4">Resultados de la Evaluación</h2>
+                    <div class="flex flex-col md:flex-row justify-around items-center gap-6">
+                        <div class="text-center">
+                            <p class="text-lg font-medium text-gray-600">Puntaje Total</p>
+                            <p id="total-score" class="text-5xl font-bold text-blue-600">0</p>
+                        </div>
+                        <div class="w-full md:w-px h-px md:h-24 bg-gray-300"></div>
+                        <div class="text-center">
+                            <p class="text-lg font-medium text-gray-600">Calificación (sobre 5.0)</p>
+                            <p id="final-grade" class="text-5xl font-bold text-blue-600">0.0</p>
+                        </div>
+                        <div class="w-full md:w-px h-px md:h-24 bg-gray-300"></div>
+                        <!--
+                        <div class="text-center">
+                            <p class="text-lg font-medium text-gray-600">Valoración</p>
+                            <p id="final-assessment" class="text-3xl font-bold text-gray-700">-</p>
+                        </div>
+                        -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                <button id="save-button" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors duration-300 shadow-md text-lg">
+                    Guardar Evaluación
+                </button>
+                <button id="reset-button" class="w-full sm:w-auto bg-gray-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-gray-700 transition-colors duration-300 shadow-md text-lg">
+                    Limpiar Formulario
+                </button>
+            </div>
+
+            <!-- Sección de Evaluaciones Guardadas 
+            <div class="mt-12">
+                <h2 class="text-3xl font-bold text-center mb-6">Historial de Evaluaciones</h2>
+                <div id="saved-evaluations-list" class="space-y-6">
+                    <p id="loading-evals" class="text-center text-gray-500">Cargando evaluaciones...</p>
+                    
+                </div>
+            </div>
+        -->
+        </main>
+
+        <footer class="text-center mt-12 text-gray-500 text-sm">
+            <p>Herramienta de Rúbrica Interactiva con almacenamiento en la nube.</p>
+        </footer>
+    </div>
+
+    <!-- Modal para notificaciones -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-lg shadow-2xl p-6 sm:p-8 max-w-sm w-full text-center">
+            <h3 id="modal-title" class="text-xl font-bold mb-4"></h3>
+            <p id="modal-message" class="text-gray-600 mb-6"></p>
+            <button id="modal-close" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors">Cerrar</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // Importaciones de Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- Configuración de Firebase ---
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+            const firebaseConfig = {
+            apiKey: "AIzaSyAM9bEz_JFH3o_S6VQBjhSElJed3s3fRnY",
+            authDomain: "evaluacionpropuestastg.firebaseapp.com",
+            databaseURL: "https://evaluacionpropuestastg-default-rtdb.firebaseio.com",
+            projectId: "evaluacionpropuestastg",
+            storageBucket: "evaluacionpropuestastg.firebasestorage.app",
+            messagingSenderId: "986800422669",
+            appId: "1:986800422669:web:802a03138afefeb8af3a44",
+            measurementId: "G-CB5B10RKSM"
+            };
+            const appId = 'evaluacionpropuestastg';
+            const initialAuthToken = null;
+
+
+
+            // Inicializar Firebase
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+
+            // Elementos del DOM
+            const rubricBody = document.getElementById('rubric-body');
+            const totalScoreEl = document.getElementById('total-score');
+            const finalGradeEl = document.getElementById('final-grade');
+            const finalAssessmentEl = document.getElementById('final-assessment');
+            const saveButton = document.getElementById('save-button');
+            const resetButton = document.getElementById('reset-button');
+            const savedEvalsList = document.getElementById('saved-evaluations-list');
+            const loadingEvals = document.getElementById('loading-evals');
+
+            // Modal
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalMessage = document.getElementById('modal-message');
+            const modalClose = document.getElementById('modal-close');
+
+            // Datos de la Rúbrica
+            const criteria = [
+                { name: 'Título del Anteproyecto', id: 'titulo' },
+                { name: 'Planteamiento del Problema', id: 'problema' },
+                { name: 'Justificación', id: 'justificacion' },
+                { name: 'Objetivos (General y Específicos)', id: 'objetivos' },
+                { name: 'Marco Teórico y Antecedentes', id: 'marco-teorico' },
+                { name: 'Metodología Propuesta', id: 'metodologia' },
+                { name: 'Resultados Esperados e Impacto', id: 'resultados' },
+                { name: 'Cronograma de Actividades', id: 'cronograma' },
+                { name: 'Presupuesto y Recursos', id: 'presupuesto' },
+                { name: 'Referencias Bibliográficas', id: 'referencias' }
+            ];
+            const scores = [5, 4, 3, 1];
+            let maxScore = 0;
+
+            // --- Funciones ---
+
+            function showModal(title, message) {
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+                modal.classList.remove('hidden');
+            }
+
+            function hideModal() {
+                modal.classList.add('hidden');
+            }
+            
+            // --- Autenticación ---
+            async function authenticateUser() {
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                    console.log("Autenticación exitosa. User ID:", auth.currentUser.uid);
+                    listenForEvaluations(); // Ahora esta función está en el scope correcto
+                } catch (error) {
+                    console.error("Error de autenticación:", error);
+                    showModal('Error de Autenticación', 'No se pudo conectar con el servicio. Por favor, recargue la página.');
+                }
+            }
+
+            function renderRubric() {
+                let html = '';
+                criteria.forEach(criterion => {
+                    html += `<tr class="border-t border-gray-200 hover:bg-gray-50">`;
+                    html += `<td class="table-cell criterion-cell">${criterion.name}</td>`;
+                    scores.forEach(score => {
+                        html += `<td class="table-cell"><input type="radio" name="criterion-${criterion.id}" value="${score}" class="cursor-pointer"></td>`;
+                    });
+                    html += `</tr>`;
+                });
+                rubricBody.innerHTML = html;
+                maxScore = criteria.length * 5;
+            }
+
+            function calculateResults() {
+                const selectedRadios = document.querySelectorAll('input[type="radio"]:checked');
+                let currentTotalScore = 0;
+                selectedRadios.forEach(radio => {
+                    currentTotalScore += parseInt(radio.value);
+                });
+
+                const finalGrade = maxScore > 0 ? (currentTotalScore / maxScore * 5.0).toFixed(1) : "0.0";
+                totalScoreEl.textContent = currentTotalScore;
+                finalGradeEl.textContent = finalGrade;
+                updateAssessment(finalGrade);
+            }
+
+            function updateAssessment(grade) {
+                if (grade >= 4.5) {
+                    finalAssessmentEl.textContent = 'Excelente';
+                    finalAssessmentEl.className = 'text-3xl font-bold text-green-600';
+                } else if (grade >= 3.5) {
+                    finalAssessmentEl.textContent = 'Aprobado';
+                    finalAssessmentEl.className = 'text-3xl font-bold text-blue-600';
+                } else if (grade >= 3.0) {
+                    finalAssessmentEl.textContent = 'Aprobado con Correcciones';
+                    finalAssessmentEl.className = 'text-3xl font-bold text-yellow-500';
+                } else {
+                    finalAssessmentEl.textContent = 'No Aprobado';
+                    finalAssessmentEl.className = 'text-3xl font-bold text-red-600';
+                }
+            }
+
+            function resetForm() {
+                document.getElementById('evaluator-name').value = '';
+                document.getElementById('project-name').value = '';
+                document.getElementById('observations').value = '';
+                document.querySelectorAll('input[type="radio"]').forEach(radio => radio.checked = false);
+                calculateResults();
+                finalAssessmentEl.textContent = '-';
+                finalAssessmentEl.className = 'text-3xl font-bold text-gray-700';
+            }
+
+            async function saveEvaluation() {
+                const evaluatorName = document.getElementById('evaluator-name').value.trim();
+                const projectName = document.getElementById('project-name').value.trim();
+                const observations = document.getElementById('observations').value.trim();
+                const selectedRadios = document.querySelectorAll('input[type="radio"]:checked');
+
+                if (!evaluatorName || !projectName) {
+                    showModal('Campos Incompletos', 'Por favor, ingrese el nombre del evaluador y del anteproyecto.');
+                    return;
+                }
+                if (selectedRadios.length < criteria.length) {
+                    showModal('Evaluación Incompleta', 'Por favor, califique todos los criterios de la rúbrica.');
+                    return;
+                }
+
+                saveButton.disabled = true;
+                saveButton.textContent = 'Guardando...';
+
+                const scoresByCriterion = {};
+                criteria.forEach(c => {
+                    const radio = document.querySelector(`input[name="criterion-${c.id}"]:checked`);
+                    scoresByCriterion[c.id] = radio ? parseInt(radio.value) : 0;
+                });
+
+                const evaluationData = {
+                    evaluatorName,
+                    projectName,
+                    observations,
+                    scores: scoresByCriterion,
+                    totalScore: parseInt(totalScoreEl.textContent),
+                    finalGrade: parseFloat(finalGradeEl.textContent),
+                    assessment: finalAssessmentEl.textContent,
+                    createdAt: new Date().toISOString(),
+                };
+
+                try {
+                    const collectionPath = `/artifacts/${appId}/public/data/evaluations`;
+                    await addDoc(collection(db, collectionPath), evaluationData);
+                    showModal('Éxito', 'La evaluación ha sido guardada correctamente.');
+                    resetForm();
+                } catch (error) {
+                    console.error("Error al guardar la evaluación: ", error);
+                    showModal('Error', 'No se pudo guardar la evaluación. Revise la consola para más detalles.');
+                } finally {
+                    saveButton.disabled = false;
+                    saveButton.textContent = 'Guardar Evaluación';
+                }
+            }
+
+            function listenForEvaluations() {
+                const collectionPath = `/artifacts/${appId}/public/data/evaluations`;
+                const q = query(collection(db, collectionPath));
+                
+                onSnapshot(q, (querySnapshot) => {
+                    loadingEvals.classList.add('hidden');
+                    if (querySnapshot.empty) {
+                        savedEvalsList.innerHTML = '<p class="text-center text-gray-500">Aún no hay evaluaciones guardadas.</p>';
+                        return;
+                    }
+                    
+                    let html = '';
+                    const docs = querySnapshot.docs.sort((a,b) => new Date(b.data().createdAt) - new Date(a.data().createdAt));
+
+                    docs.forEach(doc => {
+                        const evalData = doc.data();
+                        html += `
+                            <div class="bg-white p-5 rounded-lg shadow-md saved-eval-card">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h4 class="font-bold text-lg text-blue-700">${evalData.projectName}</h4>
+                                        <p class="text-sm text-gray-600">Evaluado por: <span class="font-medium">${evalData.evaluatorName}</span></p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-2xl font-bold">${evalData.finalGrade.toFixed(1)}</p>
+                                        <p class="text-sm font-semibold ${getAssessmentColor(evalData.assessment)}">${evalData.assessment}</p>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-1">${new Date(evalData.createdAt).toLocaleString('es-CO')}</p>
+                                ${evalData.observations ? `<div class="mt-4 pt-4 border-t border-gray-200">
+                                    <h5 class="font-semibold mb-1">Observaciones:</h5>
+                                    <p class="text-gray-700 whitespace-pre-wrap">${evalData.observations}</p>
+                                </div>` : ''}
+                            </div>
+                        `;
+                    });
+                    savedEvalsList.innerHTML = html;
+                }, (error) => {
+                    console.error("Error al obtener evaluaciones:", error);
+                    loadingEvals.textContent = 'Error al cargar las evaluaciones.';
+                });
+            }
+
+            function getAssessmentColor(assessment) {
+                if (assessment === 'Excelente') return 'text-green-600';
+                if (assessment === 'Aprobado') return 'text-blue-600';
+                if (assessment === 'Aprobado con Correcciones') return 'text-yellow-500';
+                return 'text-red-600';
+            }
+
+            // --- Inicialización y Eventos ---
+            renderRubric();
+            calculateResults();
+            authenticateUser(); // Iniciar el proceso de autenticación
+
+            rubricBody.addEventListener('change', calculateResults);
+            saveButton.addEventListener('click', saveEvaluation);
+            resetButton.addEventListener('click', resetForm);
+            modalClose.addEventListener('click', hideModal);
+        });
+    </script>
+</body>
+</html>
